@@ -46,7 +46,7 @@ def set_type(addr, type):
 	else:
 		createData(addr, addrType)
 
-def make_function(start, end):
+def make_function(start):
 	func = getFunctionAt(start)
 	if func is None:
 		createFunction(start, None)
