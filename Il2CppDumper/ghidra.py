@@ -35,17 +35,9 @@ def set_type(addr, type):
 		createData(addr, dataTypes[0])
 
 def make_function(start, end):
-	next_func_start = getFunctionAfter(start).getEntryPoint()
-	if next_func_start < end:
-		end = next_func_start
-	body = createAddressSet()
-	body.addRange(start, end.subtract(1))
-	functionManager.deleteAddressRange(start, end.subtract(1), getMonitor())
 	func = getFunctionAt(start)
 	if func is None:
-		functionManager.createFunction(None, start, body, USER_DEFINED)
-	else:
-		func.setBody(body)
+		createFunction(start, None)
 
 def set_sig(addr, name, sig):
 	try: 
@@ -125,8 +117,7 @@ if "Addresses" in data and "Addresses" in processFields:
 	monitor.setMessage("Addresses")
 	for index in range(len(addresses) - 1):
 		start = get_addr(addresses[index])
-		end = get_addr(addresses[index + 1])
-		make_function(start, end)
+		make_function(start)
 		monitor.incrementProgress(1)
 
 if "ScriptMethod" in data and "ScriptMethod" in processFields:
