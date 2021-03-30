@@ -89,16 +89,23 @@ namespace Il2CppDumper
                 ShowHelp();
                 return;
             }
-            try
+            if (metadataPath == null)
             {
-                if (Init(il2cppPath, metadataPath, out var metadata, out var il2Cpp))
-                {
-                    Dump(metadata, il2Cpp, outputDir);
-                }
+                Console.WriteLine($"ERROR: Metadata file not found or encrypted.");
             }
-            catch (Exception e)
+            else
             {
-                Console.WriteLine(e);
+                try
+                {
+                    if (Init(il2cppPath, metadataPath, out var metadata, out var il2Cpp))
+                    {
+                        Dump(metadata, il2Cpp, outputDir);
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
             }
             if (config.RequireAnyKey)
             {
@@ -187,7 +194,7 @@ namespace Il2CppDumper
             Console.WriteLine("Searching...");
             try
             {
-                var flag = il2Cpp.PlusSearch(metadata.methodDefs.Count(x => x.methodIndex >= 0), metadata.typeDefs.Length);
+                var flag = il2Cpp.PlusSearch(metadata.methodDefs.Count(x => x.methodIndex >= 0), metadata.typeDefs.Length, metadata.imageDefs.Length);
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
                     if (!flag && il2Cpp is PE)
@@ -195,7 +202,7 @@ namespace Il2CppDumper
                         Console.WriteLine("Use custom PE loader");
                         il2Cpp = PELoader.Load(il2cppPath);
                         il2Cpp.SetProperties(version, metadata.maxMetadataUsages);
-                        flag = il2Cpp.PlusSearch(metadata.methodDefs.Count(x => x.methodIndex >= 0), metadata.typeDefs.Length);
+                        flag = il2Cpp.PlusSearch(metadata.methodDefs.Count(x => x.methodIndex >= 0), metadata.typeDefs.Length, metadata.imageDefs.Length);
                     }
                 }
                 if (!flag)
@@ -233,17 +240,17 @@ namespace Il2CppDumper
             var decompiler = new Il2CppDecompiler(executor);
             decompiler.Decompile(config, outputDir);
             Console.WriteLine("Done!");
-            if (config.GenerateScript)
+            if (config.GenerateStruct)
             {
-                Console.WriteLine("Generate script...");
-                var scriptGenerator = new ScriptGenerator(executor);
+                Console.WriteLine("Generate struct...");
+                var scriptGenerator = new StructGenerator(executor);
                 scriptGenerator.WriteScript(outputDir);
                 Console.WriteLine("Done!");
             }
             if (config.GenerateDummyDll)
             {
                 Console.WriteLine("Generate dummy dll...");
-                DummyAssemblyExporter.Export(executor, outputDir);
+                DummyAssemblyExporter.Export(executor, outputDir, config.DummyDllAddToken);
                 Console.WriteLine("Done!");
             }
         }
