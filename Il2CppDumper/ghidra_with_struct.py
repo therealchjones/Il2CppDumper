@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
 import json
 
+# ghidra-stubs support only
+try:
+	from ghidra.ghidra_builtins import *
+except:
+	pass
+
 from ghidra.app.util.cparser.C import CParserUtils
 from ghidra.app.cmd.function import ApplyFunctionSignatureCmd
 
@@ -52,7 +58,7 @@ def make_function(start):
 		createFunction(start, None)
 
 def set_sig(addr, name, sig):
-	try: 
+	try:
 		typeSig = CParserUtils.parseSignature(None, currentProgram, sig, False)
 	except ghidra.app.util.cparser.C.ParseException:
 		print("Warning: Unable to parse")
